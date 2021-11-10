@@ -77,9 +77,11 @@ if (__name__ == "__main__"):
     for linha in arquivo:
         linha = linha.replace("\n","").split(sep=";")
         be.registra_log_geral(f"Iniciando Download de repositórios: {linha[1]}")
+        print(f"Iniciando Download de repositórios: {linha[1]}")
         rep_list = download_allRepos(linha[0] == 'org', linha[1], linha[2])
         if(rep_list):
-            be.registra_log_geral("Compactando dados baixados.")
+            be.registra_log_geral("Compactando dados baixados. Isso pode demorar vários minutos.")
+            print("Compactando dados baixados.")
             compact(rep_list, f"Github_{linha[1]}_BACK", False)
     be.registra_log_geral("Fim do programa.")
     print("FIM DO PROGRAMA!")
