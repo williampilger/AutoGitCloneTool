@@ -7,7 +7,7 @@ Ferramenta para clonar repositórios de um usuário ou organização.
 Você pode executar a ferramenta utilizando o código fonte e o interpretador python (será necessário instalar),
 ou usar as ferramentas pré compiladas:
 
-- [Ubuntu x64]()
+- [Ubuntu x64](https://github.com/williampilger/AutoGitCloneTool/raw/main/dist/GetAllRepos)
 - [Windows10 x64]()
 
 ## Configuração
