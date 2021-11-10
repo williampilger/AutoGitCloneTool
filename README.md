@@ -8,7 +8,7 @@ Você pode executar a ferramenta utilizando o código fonte e o interpretador py
 ou usar as ferramentas pré compiladas:
 
 - [Ubuntu x64](https://github.com/williampilger/AutoGitCloneTool/raw/main/dist/GetAllRepos)
-- [Windows10 x64]()
+- [Windows10 x64](https://github.com/williampilger/AutoGitCloneTool/raw/main/dist/GetAllRepos.exe)
 
 ## Configuração
 
