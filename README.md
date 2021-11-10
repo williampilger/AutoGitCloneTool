@@ -25,3 +25,7 @@ Repare que acima, estão configurados três conjuntos de dados.
 Na primeira linha temos um usuário (por isso `user` como primeiro campo).
 `williampilger` é o nome do usuário do qual serão baixados os dados.
 `ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK` é o token de autenticação criado nas configurações do github.
+
+## Sobre
+
+By: **will.i.am** | Bom Princípio - RS
