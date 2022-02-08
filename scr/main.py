@@ -66,13 +66,13 @@ def compact(list_diretorios, prefixo, arqUnico):
     make_archive(arqNome, 'zip', 'down')
     print("Aguardando exclusão dos arquivos compactados.")
     ok = False
-    for i in range(10):
+    for i in range(15):#tenta excluir por 30 segundos
         print(".", end="")
         mp.rmdir("down")
         if( not os.path.isdir('down')):
             ok = True
             break
-        time.sleep(2000)
+        time.sleep(2)
     return ok
 
 
