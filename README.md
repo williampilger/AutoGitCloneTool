@@ -26,6 +26,17 @@ Na primeira linha temos um usuário (por isso `user` como primeiro campo).
 `williampilger` é o nome do usuário do qual serão baixados os dados.
 `ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK` é o token de autenticação criado nas configurações do github.
 
+
 ## Sobre
+
+----------
+### Compilação
+
+As versões binparias foram compiladas com o `pyinstaller` usando:
+```sh
+pip install pyinstaller
+pyinstaller --onefile main.py
+```
+----------
 
 By: **will.i.am** | Bom Princípio - RS
