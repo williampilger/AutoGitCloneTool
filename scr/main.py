@@ -64,8 +64,16 @@ def compact(list_diretorios, prefixo, arqUnico):
     else:
         arqNome = prefixo + datetime.today().strftime('%Y%m%d%H%M%S')
     make_archive(arqNome, 'zip', 'down')
-    mp.rmdir("down")
-
+    print("Aguardando exclusão dos arquivos compactados.")
+    ok = False
+    for i in range(10):
+        print(".", end="")
+        mp.rmdir("down")
+        if( not os.path.isdir('down')):
+            ok = True
+            break
+        time.sleep(2000)
+    return ok
 
 
 if (__name__ == "__main__"):
@@ -82,7 +90,10 @@ if (__name__ == "__main__"):
         if(rep_list):
             be.registra_log_geral("Compactando dados baixados. Isso pode demorar vários minutos.")
             print("Compactando dados baixados.")
-            compact(rep_list, f"Github_{linha[1]}_BACK", False)
+            if( not compact(rep_list, f"Github_{linha[1]}_BACK", False)):
+                print("Falha ao compactar dados do repositório atual. Operação abortada.")
+                be.registra_log_geral("Falha ao compactar dados do repositório atual. Operação abortada.")
+                break;
     be.registra_log_geral("Fim do programa.")
     print("FIM DO PROGRAMA!")
     #input()
