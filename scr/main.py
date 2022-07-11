@@ -71,8 +71,8 @@ def compact(list_diretorios, prefixo, arqUnico, notRemove):
         arqNome = prefixo + datetime.today().strftime('%Y%m%d%H%M%S')
     make_archive(arqNome, 'zip', 'down')
     print("Aguardando exclusão dos arquivos compactados.")
-    ok = False
     if not notRemove:
+        ok = False
         for i in range(30):#tenta excluir por 60 segundos
             print(".", end="")
             mp.rmdir("down")
@@ -80,7 +80,8 @@ def compact(list_diretorios, prefixo, arqUnico, notRemove):
                 ok = True
                 break
             time.sleep(2)
-    return ok
+        return ok
+    return True
 
 
 if (__name__ == "__main__"):
