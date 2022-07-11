@@ -23,7 +23,7 @@ def downloadString(url, token):
     return resp
 
 
-def download_allRepos(eh_organizacao, repositorio, token):
+def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo):
     if(eh_organizacao):
         tipo = "orgs"
     else:
@@ -34,7 +34,10 @@ def download_allRepos(eh_organizacao, repositorio, token):
     if(resposta):
         print(" - OK")
         repos_list = []
-        mp.mkdir('down')
+        filedir = 'down'
+        if eh_progressivo:
+            filedir = filedir + '/' + repositorio
+        mp.mkdir(filedir)
         while True:
             #Obter nome do repositório
             find_text = "\"name\":\""
@@ -43,7 +46,6 @@ def download_allRepos(eh_organizacao, repositorio, token):
                 break
             resposta = resposta[desloc+len(find_text):]
             nome = resposta[0:resposta.find("\"")]
-            repos_list.append(nome)
             #Obter Clone URL
             find_text = "\"clone_url\":\""
             desloc = resposta.find(find_text)
@@ -52,12 +54,16 @@ def download_allRepos(eh_organizacao, repositorio, token):
             resposta = resposta[desloc+len(find_text):]
             cloneurl = resposta[0:resposta.find("\"")]
             print("\n ",nome," (", cloneurl, ")")
-            os.system("git clone "+cloneurl.replace("ps://","ps://"+token+"@")+" "+mp.dirConvert("down/"+nome))
+            if eh_progressivo and os.path.isdir(f"{filedir}/{nome}"):
+                os.system(f"cd {filedir}/{nome} & git pull")
+            else:
+                os.system("git clone "+cloneurl.replace("ps://","ps://"+token+"@")+" "+mp.dirConvert(f"{filedir}/{nome}"))
+            repos_list.append(nome)
         return repos_list
     else:
         print(" - FALHA")
 
-def compact(list_diretorios, prefixo, arqUnico):
+def compact(list_diretorios, prefixo, arqUnico, notRemove):
     if(arqUnico):
         arqNome = prefixo
         mp.delfile(arqNome+".zip")
@@ -66,31 +72,32 @@ def compact(list_diretorios, prefixo, arqUnico):
     make_archive(arqNome, 'zip', 'down')
     print("Aguardando exclusão dos arquivos compactados.")
     ok = False
-    for i in range(30):#tenta excluir por 60 segundos
-        print(".", end="")
-        mp.rmdir("down")
-        if( not os.path.isdir('down')):
-            ok = True
-            break
-        time.sleep(2)
+    if not notRemove:
+        for i in range(30):#tenta excluir por 60 segundos
+            print(".", end="")
+            mp.rmdir("down")
+            if( not os.path.isdir('down')):
+                ok = True
+                break
+            time.sleep(2)
     return ok
 
 
 if (__name__ == "__main__"):
-    #print("CONSULTE https://developer.github.com/changes/2020-02-10-deprecating-auth-through-query-param/")
-    #input()#A função atualmente não funciona mais. é possível obter apenas os repositórios públicos.
-    #sair(1)
     be.registra_log_geral("Lendo arquivo de configuração")
     arquivo = open("config", "rt")
     for linha in arquivo:
         linha = linha.replace("\n","").split(sep=";")
+        if len(linha) > 3:
+            progressive = len(linha) > 3 and linha[3] == 'Progressive'
+            onefile = linha[3] == 'OneFile' or progressive
         be.registra_log_geral(f"Iniciando Download de repositórios: {linha[1]}")
         print(f"Iniciando Download de repositórios: {linha[1]}")
-        rep_list = download_allRepos(linha[0] == 'org', linha[1], linha[2])
+        rep_list = download_allRepos(linha[0] == 'org', linha[1], linha[2], progressive)
         if(rep_list):
             be.registra_log_geral("Compactando dados baixados. Isso pode demorar vários minutos.")
             print("Compactando dados baixados.")
-            if( not compact(rep_list, f"Github_{linha[1]}_BACK", len(linha) > 3 and linha[3] == 'OneFile')):
+            if( not compact(rep_list, f"Github_{linha[1]}_BACK", onefile, progressive)):
                 print("Falha ao compactar dados do repositório atual. Operação abortada.")
                 be.registra_log_geral("Falha ao compactar dados do repositório atual. Operação abortada.")
                 break

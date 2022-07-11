@@ -33,13 +33,14 @@ Este arquivo precisa conte os campos de
 | --- | --- |
 | NÃO INFORMADO | Cada vez que o backup for feito, um novo nome para o arquivo compactado é gerado. |
 | `OneFile` | Todas as repetições do backup recebem o mesmo nome, e o arquivo de saída é sobrescrito/atualizado. |
+| `Progressive` | O Download dos repositórios sempre será mantido, dando apenas um `git fetch` quando o mesmo já existe. | 
 
 Estes campos devem ser separados por `;`, como no exemplo abaixo:
 
 ```
 user;williampilger;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK;OneFile
 org;authentyAE;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK
-org;isDesign-Softwares;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK
+org;isDesign-Softwares;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK;Progressive
 ```
 
 Repare que acima, estão configurados três conjuntos de dados.
