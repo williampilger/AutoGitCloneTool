@@ -39,7 +39,7 @@ def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo):
             repos_list = []
             filedir = 'down'
             if eh_progressivo:
-                filedir = filedir + '/' + repositorio
+                filedir = mp.dirConvert(f"{filedir}/{repositorio}")
             mp.mkdir(filedir)
             while True:
                 #Obter nome do repositório
@@ -57,8 +57,8 @@ def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo):
                 resposta = resposta[desloc+len(find_text):]
                 cloneurl = resposta[0:resposta.find("\"")]
                 print("\n ",nome," (", cloneurl, ")")
-                if eh_progressivo and os.path.isdir(f"{filedir}/{nome}"):
-                    os.system(f"cd {filedir}/{nome} & git pull")
+                if eh_progressivo and os.path.isdir(mp.dirConvert(f"{filedir}/{nome}")):
+                    os.system(f"cd "+mp.dirConvert(f"{filedir}/{nome}")+" & git pull")
                 else:
                     os.system("git clone "+cloneurl.replace("ps://","ps://"+token+"@")+" "+mp.dirConvert(f"{filedir}/{nome}"))
                 repos_list.append(nome)
@@ -95,8 +95,8 @@ def compact(dir, prefixo, arqUnico, notRemove):
 if (__name__ == "__main__"):
     be.registra_log_geral("Lendo arquivo de configuração")
     arquivo = open("config", "rt")
-    dir = 'down'
     for linha in arquivo:
+        dir = 'down'
         linha = linha.replace("\n","").split(sep=";")
         if len(linha) > 3:
             progressive = len(linha) > 3 and linha[3] == 'Progressive'
