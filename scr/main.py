@@ -28,40 +28,48 @@ def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo):
         tipo = "orgs"
     else:
         tipo = "users"
-    url = "https://api.github.com/" + tipo + "/" + repositorio + "/repos"
-    print("Obtendo lista de repositórios", end="")
-    resposta = downloadString(url, token)
-    if(resposta):
-        print(" - OK")
-        repos_list = []
-        filedir = 'down'
-        if eh_progressivo:
-            filedir = filedir + '/' + repositorio
-        mp.mkdir(filedir)
-        while True:
-            #Obter nome do repositório
-            find_text = "\"name\":\""
-            desloc = resposta.find(find_text)
-            if(desloc == -1):
-                break
-            resposta = resposta[desloc+len(find_text):]
-            nome = resposta[0:resposta.find("\"")]
-            #Obter Clone URL
-            find_text = "\"clone_url\":\""
-            desloc = resposta.find(find_text)
-            if(desloc == -1):
-                break
-            resposta = resposta[desloc+len(find_text):]
-            cloneurl = resposta[0:resposta.find("\"")]
-            print("\n ",nome," (", cloneurl, ")")
-            if eh_progressivo and os.path.isdir(f"{filedir}/{nome}"):
-                os.system(f"cd {filedir}/{nome} & git pull")
-            else:
-                os.system("git clone "+cloneurl.replace("ps://","ps://"+token+"@")+" "+mp.dirConvert(f"{filedir}/{nome}"))
-            repos_list.append(nome)
-        return repos_list
-    else:
-        print(" - FALHA")
+    page = 1
+    while True:
+        reposCont = 0
+        url = f"https://api.github.com/{tipo}/{repositorio}/repos?per_page=100&page={page}"
+        print("Obtendo lista de repositórios", end="")
+        resposta = downloadString(url, token)
+        if(resposta):
+            print(" - OK")
+            repos_list = []
+            filedir = 'down'
+            if eh_progressivo:
+                filedir = filedir + '/' + repositorio
+            mp.mkdir(filedir)
+            while True:
+                #Obter nome do repositório
+                find_text = "\"name\":\""
+                desloc = resposta.find(find_text)
+                if(desloc == -1):
+                    break
+                resposta = resposta[desloc+len(find_text):]
+                nome = resposta[0:resposta.find("\"")]
+                #Obter Clone URL
+                find_text = "\"clone_url\":\""
+                desloc = resposta.find(find_text)
+                if(desloc == -1):
+                    break
+                resposta = resposta[desloc+len(find_text):]
+                cloneurl = resposta[0:resposta.find("\"")]
+                print("\n ",nome," (", cloneurl, ")")
+                if eh_progressivo and os.path.isdir(f"{filedir}/{nome}"):
+                    os.system(f"cd {filedir}/{nome} & git pull")
+                else:
+                    os.system("git clone "+cloneurl.replace("ps://","ps://"+token+"@")+" "+mp.dirConvert(f"{filedir}/{nome}"))
+                repos_list.append(nome)
+                reposCont += 1
+        else:
+            print(" - FALHA")
+        if(reposCont < 100):
+            break #Aqui, se há 100, significa que há uma página seguinte.
+        else:
+            page += 1
+    return repos_list
 
 def compact(list_diretorios, prefixo, arqUnico, notRemove):
     if(arqUnico):
