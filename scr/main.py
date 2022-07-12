@@ -71,13 +71,13 @@ def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo):
             page += 1
     return repos_list
 
-def compact(list_diretorios, prefixo, arqUnico, notRemove):
+def compact(dir, prefixo, arqUnico, notRemove):
     if(arqUnico):
         arqNome = prefixo
         mp.delfile(arqNome+".zip")
     else:
         arqNome = prefixo + datetime.today().strftime('%Y%m%d%H%M%S')
-    make_archive(arqNome, 'zip', 'down')
+    make_archive(arqNome, 'zip', dir)
     print("Aguardando exclusão dos arquivos compactados.")
     if not notRemove:
         ok = False
@@ -95,18 +95,20 @@ def compact(list_diretorios, prefixo, arqUnico, notRemove):
 if (__name__ == "__main__"):
     be.registra_log_geral("Lendo arquivo de configuração")
     arquivo = open("config", "rt")
+    dir = 'down'
     for linha in arquivo:
         linha = linha.replace("\n","").split(sep=";")
         if len(linha) > 3:
             progressive = len(linha) > 3 and linha[3] == 'Progressive'
             onefile = linha[3] == 'OneFile' or progressive
+            dir = f'{dir}/{linha[1]}'
         be.registra_log_geral(f"Iniciando Download de repositórios: {linha[1]}")
         print(f"Iniciando Download de repositórios: {linha[1]}")
         rep_list = download_allRepos(linha[0] == 'org', linha[1], linha[2], progressive)
         if(rep_list):
             be.registra_log_geral("Compactando dados baixados. Isso pode demorar vários minutos.")
             print("Compactando dados baixados.")
-            if( not compact(rep_list, f"Github_{linha[1]}_BACK", onefile, progressive)):
+            if( not compact(dir, f"Github_{linha[1]}_BACK", onefile, progressive)):
                 print("Falha ao compactar dados do repositório atual. Operação abortada.")
                 be.registra_log_geral("Falha ao compactar dados do repositório atual. Operação abortada.")
                 break
