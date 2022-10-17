@@ -50,6 +50,12 @@ Na primeira linha temos um usuário (por isso `user` como primeiro campo).
 `OneFile` É um campo opcional, e os repositórios neste caso serão compactados sempre para o mesmo nome de arquivo, sobrescrevendo o backup anterior.
 
 
+#### Criar Token de autenticação GitHub
+
+Acesse **Seu Perfil** > **Settings** > **Developer Settings** > **Personal Access Tokens** e cadastre um novo token.
+
+
+
 ## Sobre
 
 ----------
