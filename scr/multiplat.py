@@ -52,3 +52,16 @@ def dirConvert(dirstring):
         return dirstring.replace("/","\\")
     elif(eh_linux):
         return dirstring.replace("\\","/")
+
+
+#Substitui variáveis de ambiente
+def replaceAmbientVars(string):
+    if(eh_windows):
+        if(string.find("%") != -1):
+            for var in os.environ:
+                string = string.replace("%"+var+"%", os.environ[var])
+    elif(eh_linux):
+        if(string.find("$") != -1):
+            for var in os.environ:
+                string = string.replace("$"+var, os.environ[var])
+    return string

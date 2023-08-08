@@ -7,7 +7,7 @@ Ferramenta para clonar repositórios de um usuário ou organização.
 Você pode executar a ferramenta utilizando o código fonte e o interpretador python (será necessário instalar),
 ou usar as ferramentas pré compiladas:
 
-- [Ubuntu x64](https://github.com/williampilger/AutoGitCloneTool/raw/main/dist/GetAllRepos)
+- [OLD VERSION - Ubuntu x64](https://github.com/williampilger/AutoGitCloneTool/raw/main/dist/GetAllRepos)
 - [Windows Server x64](https://github.com/williampilger/AutoGitCloneTool/raw/main/dist/GetAllRepos.exe)
 
 ## Configuração
@@ -29,6 +29,10 @@ Este arquivo precisa conte os campos de
 | --- |
 | Token de API do GitHub |
 
+| **diretório de download** |
+| --- |
+| Diretório onde serão salvos os arquivos temporários (ou o repositório extraído, no caso do progressivo) |
+
 | **modo de compactação** (opcional) | Descrição |
 | --- | --- |
 | NÃO INFORMADO | Cada vez que o backup for feito, um novo nome para o arquivo compactado é gerado. |
@@ -38,15 +42,16 @@ Este arquivo precisa conte os campos de
 Estes campos devem ser separados por `;`, como no exemplo abaixo:
 
 ```
-user;williampilger;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK;OneFile
-org;authentyAE;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK
-org;isDesign-Softwares;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK;Progressive
+user;williampilger;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK;down;OneFile
+org;authentyAE;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK;down
+org;isDesign-Softwares;ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK;%temp%\down;Progressive
 ```
 
 Repare que acima, estão configurados três conjuntos de dados.
 Na primeira linha temos um usuário (por isso `user` como primeiro campo).
 `williampilger` é o nome do usuário do qual serão baixados os dados.
 `ghp_Lylsz84J4f9lMEUCt6AhirgYGYvfYkgC57CK` é o token de autenticação criado nas configurações do github.
+`down` ou `%temp%\down` é o diretório, absoluto ou relativo, onde o repositório EXTRAÍDO é salvo (temporário ou definitivamente). Este campo depende do seu sistema operacional.
 `OneFile` É um campo opcional, e os repositórios neste caso serão compactados sempre para o mesmo nome de arquivo, sobrescrevendo o backup anterior.
 
 

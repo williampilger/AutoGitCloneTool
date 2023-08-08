@@ -71,3 +71,4 @@ def carregaStringArray(filename):
             arr.append(linha)
         return arr
     return None
+

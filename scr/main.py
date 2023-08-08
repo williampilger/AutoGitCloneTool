@@ -22,8 +22,7 @@ def downloadString(url, token):
     resp = requests.get(url, headers = pload ).text
     return resp
 
-
-def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo):
+def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo, inifiledir):
     if(eh_organizacao):
         tipo = "orgs"
     else:
@@ -37,7 +36,7 @@ def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo):
         if(resposta):
             print(" - OK")
             repos_list = []
-            filedir = 'down'
+            filedir = inifiledir
             if eh_progressivo:
                 filedir = mp.dirConvert(f"{filedir}/{repositorio}")
             mp.mkdir(filedir)
@@ -72,6 +71,9 @@ def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo):
     return repos_list
 
 def compact(dir, prefixo, arqUnico, notRemove):
+    print("TESTE", dir)
+    dir = mp.dirConvert(dir)
+    print("TESTE2", dir)
     if(arqUnico):
         arqNome = prefixo
         mp.delfile(arqNome+".zip")
@@ -83,8 +85,8 @@ def compact(dir, prefixo, arqUnico, notRemove):
         ok = False
         for i in range(30):#tenta excluir por 60 segundos
             print(".", end="")
-            mp.rmdir("down")
-            if( not os.path.isdir('down')):
+            mp.rmdir(dir)
+            if( not os.path.isdir(dir)):
                 ok = True
                 break
             time.sleep(2)
@@ -96,22 +98,23 @@ if (__name__ == "__main__"):
     be.registra_log_geral("Lendo arquivo de configuração")
     arquivo = open("config", "rt")
     for linha in arquivo:
-        dir = 'down'
-        linha = linha.replace("\n","").split(sep=";")
-        if len(linha) > 3:
-            progressive = len(linha) > 3 and linha[3] == 'Progressive'
-            onefile = linha[3] == 'OneFile' or progressive
-            dir = f'{dir}/{linha[1]}'
-        be.registra_log_geral(f"Iniciando Download de repositórios: {linha[1]}")
-        print(f"Iniciando Download de repositórios: {linha[1]}")
-        rep_list = download_allRepos(linha[0] == 'org', linha[1], linha[2], progressive)
+        [conf_type, conf_profile, conf_hash, conf_dir, conf_mode] = linha.replace("\n","").split(sep=";")
+        conf_dir = mp.replaceAmbientVars(conf_dir)
+
+        progressive = conf_mode == 'Progressive'
+        onefile = conf_mode == 'OneFile' or progressive
+        dir = f'{conf_dir}/{conf_profile}'
+
+        be.registra_log_geral(f"Iniciando Download de repositórios: {conf_profile}")
+        print(f"Iniciando Download de repositórios: {conf_profile}")
+        rep_list = download_allRepos(conf_type == 'org', conf_profile, conf_hash, progressive, dir)
         if(rep_list):
             be.registra_log_geral("Compactando dados baixados. Isso pode demorar vários minutos.")
             print("Compactando dados baixados.")
-            if( not compact(dir, f"Github_{linha[1]}_BACK", onefile, progressive)):
+            if( not compact(dir, f"Github_{conf_profile}_BACK", onefile, progressive)):
                 print("Falha ao compactar dados do repositório atual. Operação abortada.")
                 be.registra_log_geral("Falha ao compactar dados do repositório atual. Operação abortada.")
                 break
     be.registra_log_geral("Fim do programa.")
     print("FIM DO PROGRAMA!")
-    #input()
+
