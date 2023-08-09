@@ -71,9 +71,7 @@ def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo, inifil
     return repos_list
 
 def compact(dir, prefixo, arqUnico, notRemove):
-    print("TESTE", dir)
     dir = mp.dirConvert(dir)
-    print("TESTE2", dir)
     if(arqUnico):
         arqNome = prefixo
         mp.delfile(arqNome+".zip")
