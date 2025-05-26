@@ -2,7 +2,7 @@
 
 Ferramenta para clonar repositórios de um usuário ou organização.
 
-## Download
+## Download >> Binário / Compilado
 
 Você pode executar a ferramenta utilizando o código fonte e o interpretador python (será necessário instalar),
 ou usar as ferramentas pré compiladas:

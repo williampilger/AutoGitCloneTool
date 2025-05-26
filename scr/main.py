@@ -2,10 +2,10 @@ try:
     import os
     import time
     from datetime import datetime
-    import shutil
     from shutil import make_archive
     import backend as be
     import multiplat as mp
+    import subprocess
 except:
     print("Biblioteca necessária não disponível.\n\nEstamos finalizando.")
     quit()
@@ -16,50 +16,43 @@ except:
     mp.install_lib('requests')
     mp.restart_program()
 
+def runOsCommand(cmd):
+    print(f"{os.getcwd()}:$ {cmd}")
+    os.system(cmd)
+
 #Função responsável por baixar a string do servidor
 def downloadString(url, token):
     pload = { 'Authorization' : 'token ' + token }
-    resp = requests.get(url, headers = pload ).text
+    resp = requests.get(url, headers = pload ).json()
     return resp
 
-def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo, inifiledir):
+def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo, inifiledir, includeStars=False):
     if(eh_organizacao):
         tipo = "orgs"
     else:
         tipo = "users"
+    repos_list = []
     page = 1
     while True:
         reposCont = 0
         url = f"https://api.github.com/{tipo}/{repositorio}/repos?per_page=100&page={page}"
         print("Obtendo lista de repositórios", end="")
-        resposta = downloadString(url, token)
-        if(resposta):
+        repos = downloadString(url, token)
+        if(repos):
             print(" - OK")
-            repos_list = []
             filedir = inifiledir
             if eh_progressivo:
                 filedir = mp.dirConvert(f"{filedir}/{repositorio}")
             mp.mkdir(filedir)
-            while True:
-                #Obter nome do repositório
-                find_text = "\"name\":\""
-                desloc = resposta.find(find_text)
-                if(desloc == -1):
-                    break
-                resposta = resposta[desloc+len(find_text):]
-                nome = resposta[0:resposta.find("\"")]
-                #Obter Clone URL
-                find_text = "\"clone_url\":\""
-                desloc = resposta.find(find_text)
-                if(desloc == -1):
-                    break
-                resposta = resposta[desloc+len(find_text):]
-                cloneurl = resposta[0:resposta.find("\"")]
-                print("\n ",nome," (", cloneurl, ")")
-                if eh_progressivo and os.path.isdir(mp.dirConvert(f"{filedir}/{nome}")):
-                    os.system(f"cd "+mp.dirConvert(f"{filedir}/{nome}")+" & git pull")
+            for repo in repos:
+                nome = repo.get("name")
+                cloneurl = repo.get("clone_url")
+                print("\n ", nome, " (", cloneurl, ")")
+                target_dir = mp.dirConvert(f"{filedir}/{nome}")
+                if eh_progressivo and os.path.isdir(target_dir):
+                    subprocess.run(['git', 'pull'], cwd=target_dir) # runOsCommand(f'cd "{target_dir}" & git pull')
                 else:
-                    os.system("git clone "+cloneurl.replace("ps://","ps://"+token+"@")+" "+mp.dirConvert(f"{filedir}/{nome}"))
+                    runOsCommand(f'git clone {cloneurl.replace('ps://', 'ps://'+token+'@')} "{target_dir}"')
                 repos_list.append(nome)
                 reposCont += 1
         else:
@@ -68,6 +61,38 @@ def download_allRepos(eh_organizacao, repositorio, token, eh_progressivo, inifil
             break #Aqui, se há 100, significa que há uma página seguinte.
         else:
             page += 1
+    if includeStars and tipo == "users":
+        print("Obtendo repositórios marcados como favoritos (stars)")
+        page = 1
+        while True:
+            reposCont = 0
+            url = f"https://api.github.com/users/{repositorio}/starred?per_page=100&page={page}"
+            print("Obtendo lista de repositórios", end="")
+            repos = downloadString(url, token)
+            if(repos):
+                print(" - OK")
+                filedir = inifiledir
+                if eh_progressivo:
+                    filedir = mp.dirConvert(f"{filedir}/{repositorio}/_stared")
+                mp.mkdir(filedir)
+                for repo in repos:
+                    owner = repo.get("owner").get("login")
+                    nome = repo.get("name")
+                    cloneurl = repo.get("clone_url")
+                    print("\n ", nome, " (", cloneurl, ")")
+                    target_dir = mp.dirConvert(f"{filedir}/{owner}/{nome}")
+                    if eh_progressivo and os.path.isdir(target_dir):
+                        subprocess.run(['git', 'pull'], cwd=target_dir) # runOsCommand(f'cd "{target_dir}" & git pull')
+                    else:
+                        runOsCommand(f'git clone {cloneurl.replace('ps://', 'ps://'+token+'@')} "{target_dir}"')
+                    repos_list.append(nome)
+                    reposCont += 1
+            else:
+                print(" - FALHA")
+            if(reposCont < 100):
+                break #Aqui, se há 100, significa que há uma página seguinte.
+            else:
+                page += 1
     return repos_list
 
 def compact(dir, prefixo, arqUnico, notRemove):
@@ -101,15 +126,15 @@ if (__name__ == "__main__"):
 
         progressive = conf_mode == 'Progressive'
         onefile = conf_mode == 'OneFile' or progressive
-        dir = f'{conf_dir}/{conf_profile}'
+        dir = f'{conf_dir}'
 
         be.registra_log_geral(f"Iniciando Download de repositórios: {conf_profile}")
         print(f"Iniciando Download de repositórios: {conf_profile}")
-        rep_list = download_allRepos(conf_type == 'org', conf_profile, conf_hash, progressive, dir)
+        rep_list = download_allRepos(conf_type == 'org', conf_profile, conf_hash, progressive, dir, True)
         if(rep_list):
             be.registra_log_geral("Compactando dados baixados. Isso pode demorar vários minutos.")
             print("Compactando dados baixados.")
-            if( not compact(dir, f"Github_{conf_profile}_BACK", onefile, progressive)):
+            if( not compact(f'{dir}/{conf_profile}', f"Github_{conf_profile}_BACK", onefile, progressive)):
                 print("Falha ao compactar dados do repositório atual. Operação abortada.")
                 be.registra_log_geral("Falha ao compactar dados do repositório atual. Operação abortada.")
                 break
